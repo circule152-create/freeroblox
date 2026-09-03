@@ -379,57 +379,72 @@
       setStatus('<span class="loader"></span>Account qidirilmoqda...');
 
       try {
-        const userResponse = await fetch(
-          "https://users.roblox.com/v1/usernames/users",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              usernames: [username],
-              excludeBannedUsers: false
-            })
-          }
-        );
+        /*
+          GitHub Pages uchun POST /v1/usernames/users o'rniga Roblox'ning
+          GET user-search endpointidan foydalanamiz. Roblox Creator Hub
+          hujjatlarida bu endpoint Cookie authentication talab qilmasligi
+          ko'rsatilgan.
+        */
+        const searchUrl =
+          "https://users.roblox.com/v1/users/search?keyword=" +
+          encodeURIComponent(username) +
+          "&limit=10";
+
+        const userResponse = await fetch(searchUrl, {
+          method: "GET",
+          mode: "cors",
+          cache: "no-store"
+        });
 
         if (!userResponse.ok) {
-          throw new Error("Roblox user API xatosi: " + userResponse.status);
+          throw new Error("Roblox user API HTTP " + userResponse.status);
         }
 
         const userData = await userResponse.json();
+        const users = Array.isArray(userData.data) ? userData.data : [];
 
-        if (!userData.data || userData.data.length === 0) {
-          setStatus("Bunday Roblox account topilmadi.", true);
+        // Exact username match first; otherwise don't accidentally show
+        // a different account returned by keyword search.
+        const user =
+          users.find(u => String(u.name || "").toLowerCase() === username.toLowerCase()) ||
+          null;
+
+        if (!user) {
+          setStatus(
+            users.length
+              ? "Aniq shu username topilmadi. Username'ni tekshiring."
+              : "Bunday Roblox account topilmadi.",
+            true
+          );
           return;
         }
 
-        const user = userData.data[0];
+        setStatus('<span class="loader"></span>Avatar yuklanmoqda...');
 
         const thumbUrl =
           "https://thumbnails.roblox.com/v1/users/avatar-headshot" +
           "?userIds=" + encodeURIComponent(user.id) +
           "&size=420x420&format=Png&isCircular=false";
 
-        const thumbResponse = await fetch(thumbUrl);
+        const thumbResponse = await fetch(thumbUrl, {
+          method: "GET",
+          mode: "cors",
+          cache: "no-store"
+        });
 
         if (!thumbResponse.ok) {
-          throw new Error("Avatar API xatosi: " + thumbResponse.status);
+          throw new Error("Roblox thumbnail API HTTP " + thumbResponse.status);
         }
 
         const thumbData = await thumbResponse.json();
         const thumbnail = thumbData.data && thumbData.data[0];
 
-        avatarEl.src = thumbnail && thumbnail.imageUrl
-          ? thumbnail.imageUrl
-          : "data:image/svg+xml;charset=UTF-8," +
-            encodeURIComponent(`
-              <svg xmlns="http://www.w3.org/2000/svg" width="420" height="420">
-                <rect width="100%" height="100%" fill="#151821"/>
-                <text x="50%" y="52%" dominant-baseline="middle" text-anchor="middle"
-                  fill="#7d8494" font-family="Arial" font-size="28">No avatar</text>
-              </svg>
-            `);
+        if (thumbnail && thumbnail.imageUrl) {
+          avatarEl.src = thumbnail.imageUrl;
+        } else {
+          avatarEl.removeAttribute("src");
+          avatarEl.alt = "Avatar mavjud emas";
+        }
 
         displayNameEl.textContent = user.displayName || user.name;
         usernameEl.textContent = "@" + user.name;
@@ -442,16 +457,25 @@
           verifiedEl.style.display = "none";
         }
 
-        profileLinkEl.href = "https://www.roblox.com/users/" + user.id + "/profile";
+        profileLinkEl.href =
+          "https://www.roblox.com/users/" + user.id + "/profile";
 
         resultEl.classList.add("show");
         setStatus("Account topildi.");
       } catch (error) {
-        console.error(error);
-        setStatus(
-          "So'rov bajarilmadi. Sayt online hostingda ishlashi kerak. GitHub Pages, Netlify yoki Vercel orqali oching.",
-          true
-        );
+        console.error("Roblox Finder:", error);
+
+        if (error instanceof TypeError) {
+          setStatus(
+            "Roblox API bilan ulanish bloklandi (CORS yoki tarmoq xatosi). GitHub Pages manzilingizdan qayta yuklang.",
+            true
+          );
+        } else {
+          setStatus(
+            "Roblox serveri so'rovni qabul qilmadi. Bir ozdan keyin qayta urinib ko'ring.",
+            true
+          );
+        }
       } finally {
         btn.disabled = false;
       }
