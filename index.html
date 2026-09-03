@@ -385,19 +385,25 @@
           hujjatlarida bu endpoint Cookie authentication talab qilmasligi
           ko'rsatilgan.
         */
-        const searchUrl =
+        const robloxSearchUrl =
           "https://users.roblox.com/v1/users/search?keyword=" +
           encodeURIComponent(username) +
           "&limit=10";
 
+        // GitHub Pages is static. If Roblox does not grant browser CORS
+        // for the request, use the public allOrigins CORS proxy for this
+        // read-only public endpoint.
+        const searchUrl =
+          "https://api.allorigins.win/raw?url=" +
+          encodeURIComponent(robloxSearchUrl);
+
         const userResponse = await fetch(searchUrl, {
           method: "GET",
-          mode: "cors",
           cache: "no-store"
         });
 
         if (!userResponse.ok) {
-          throw new Error("Roblox user API HTTP " + userResponse.status);
+          throw new Error("Search proxy HTTP " + userResponse.status);
         }
 
         const userData = await userResponse.json();
@@ -467,7 +473,7 @@
 
         if (error instanceof TypeError) {
           setStatus(
-            "Roblox API bilan ulanish bloklandi (CORS yoki tarmoq xatosi). GitHub Pages manzilingizdan qayta yuklang.",
+            "Roblox serveriga ulanish amalga oshmadi. Internetni tekshirib, qayta urinib ko‘ring.",
             true
           );
         } else {
