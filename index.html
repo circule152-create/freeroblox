@@ -379,62 +379,24 @@
       setStatus('<span class="loader"></span>Account qidirilmoqda...');
 
       try {
-        const robloxSearchUrl =
-          "https://users.roblox.com/v1/users/search?keyword=" +
-          encodeURIComponent(username) +
-          "&limit=10";
+        // IMPORTANT: replace this URL with your deployed Cloudflare Worker URL.
+        const WORKER_URL = "https://YOUR-WORKER-NAME.YOUR-SUBDOMAIN.workers.dev";
 
-        /*
-          GitHub Pages static bo'lgani uchun browser CORS muammosini
-          chetlab o'tish uchun read-only public endpointga proxy ishlatamiz.
-          Birinchi proxy ishlamasa ikkinchi proxy avtomatik sinab ko'riladi.
-        */
-        const proxyUrls = [
-          {
-            url: "https://api.allorigins.win/get?url=" +
-              encodeURIComponent(robloxSearchUrl),
-            parse: async (response) => {
-              const wrapper = await response.json();
-              if (!wrapper || typeof wrapper.contents !== "string") {
-                throw new Error("AllOrigins invalid response");
-              }
-              return JSON.parse(wrapper.contents);
-            }
-          },
-          {
-            url: "https://corsproxy.io/?url=" +
-              encodeURIComponent(robloxSearchUrl),
-            parse: async (response) => response.json()
-          }
-        ];
+        const searchUrl =
+          WORKER_URL +
+          "/roblox/users/search?keyword=" +
+          encodeURIComponent(username);
 
-        let userData = null;
-        let lastError = null;
+        const userResponse = await fetch(searchUrl, {
+          method: "GET",
+          cache: "no-store"
+        });
 
-        for (const proxy of proxyUrls) {
-          try {
-            const userResponse = await fetch(proxy.url, {
-              method: "GET",
-              cache: "no-store"
-            });
-
-            if (!userResponse.ok) {
-              throw new Error("Proxy HTTP " + userResponse.status);
-            }
-
-            userData = await proxy.parse(userResponse);
-            break;
-          } catch (err) {
-            lastError = err;
-          }
+        if (!userResponse.ok) {
+          throw new Error("Worker HTTP " + userResponse.status);
         }
 
-        if (!userData) {
-          throw new Error(
-            "Roblox search proxy ishlamadi: " +
-            (lastError ? lastError.message : "unknown error")
-          );
-        }
+        const userData = await userResponse.json();
         const users = Array.isArray(userData.data) ? userData.data : [];
 
         // Exact username match first; otherwise don't accidentally show
@@ -501,7 +463,7 @@
 
         if (error instanceof TypeError) {
           setStatus(
-            "Qidiruv serveriga ulanish amalga oshmadi. Ctrl + Shift + R qilib qayta yuklang yoki birozdan keyin urinib ko‘ring.",
+            "Cloudflare Worker URL sozlanmagan yoki Worker ishlamayapti. index.html ichidagi WORKER_URL ni tekshiring.",
             true
           );
         } else {
