@@ -379,34 +379,62 @@
       setStatus('<span class="loader"></span>Account qidirilmoqda...');
 
       try {
-        /*
-          GitHub Pages uchun POST /v1/usernames/users o'rniga Roblox'ning
-          GET user-search endpointidan foydalanamiz. Roblox Creator Hub
-          hujjatlarida bu endpoint Cookie authentication talab qilmasligi
-          ko'rsatilgan.
-        */
         const robloxSearchUrl =
           "https://users.roblox.com/v1/users/search?keyword=" +
           encodeURIComponent(username) +
           "&limit=10";
 
-        // GitHub Pages is static. If Roblox does not grant browser CORS
-        // for the request, use the public allOrigins CORS proxy for this
-        // read-only public endpoint.
-        const searchUrl =
-          "https://api.allorigins.win/raw?url=" +
-          encodeURIComponent(robloxSearchUrl);
+        /*
+          GitHub Pages static bo'lgani uchun browser CORS muammosini
+          chetlab o'tish uchun read-only public endpointga proxy ishlatamiz.
+          Birinchi proxy ishlamasa ikkinchi proxy avtomatik sinab ko'riladi.
+        */
+        const proxyUrls = [
+          {
+            url: "https://api.allorigins.win/get?url=" +
+              encodeURIComponent(robloxSearchUrl),
+            parse: async (response) => {
+              const wrapper = await response.json();
+              if (!wrapper || typeof wrapper.contents !== "string") {
+                throw new Error("AllOrigins invalid response");
+              }
+              return JSON.parse(wrapper.contents);
+            }
+          },
+          {
+            url: "https://corsproxy.io/?url=" +
+              encodeURIComponent(robloxSearchUrl),
+            parse: async (response) => response.json()
+          }
+        ];
 
-        const userResponse = await fetch(searchUrl, {
-          method: "GET",
-          cache: "no-store"
-        });
+        let userData = null;
+        let lastError = null;
 
-        if (!userResponse.ok) {
-          throw new Error("Search proxy HTTP " + userResponse.status);
+        for (const proxy of proxyUrls) {
+          try {
+            const userResponse = await fetch(proxy.url, {
+              method: "GET",
+              cache: "no-store"
+            });
+
+            if (!userResponse.ok) {
+              throw new Error("Proxy HTTP " + userResponse.status);
+            }
+
+            userData = await proxy.parse(userResponse);
+            break;
+          } catch (err) {
+            lastError = err;
+          }
         }
 
-        const userData = await userResponse.json();
+        if (!userData) {
+          throw new Error(
+            "Roblox search proxy ishlamadi: " +
+            (lastError ? lastError.message : "unknown error")
+          );
+        }
         const users = Array.isArray(userData.data) ? userData.data : [];
 
         // Exact username match first; otherwise don't accidentally show
@@ -473,7 +501,7 @@
 
         if (error instanceof TypeError) {
           setStatus(
-            "Roblox serveriga ulanish amalga oshmadi. Internetni tekshirib, qayta urinib ko‘ring.",
+            "Qidiruv serveriga ulanish amalga oshmadi. Ctrl + Shift + R qilib qayta yuklang yoki birozdan keyin urinib ko‘ring.",
             true
           );
         } else {
