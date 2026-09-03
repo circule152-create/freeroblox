@@ -418,18 +418,18 @@
         setStatus('<span class="loader"></span>Avatar yuklanmoqda...');
 
         const thumbUrl =
-          "https://thumbnails.roblox.com/v1/users/avatar-headshot" +
+          WORKER_URL +
+          "/roblox/users/avatar-headshot" +
           "?userIds=" + encodeURIComponent(user.id) +
           "&size=420x420&format=Png&isCircular=false";
 
         const thumbResponse = await fetch(thumbUrl, {
           method: "GET",
-          mode: "cors",
           cache: "no-store"
         });
 
         if (!thumbResponse.ok) {
-          throw new Error("Roblox thumbnail API HTTP " + thumbResponse.status);
+          throw new Error("Avatar Worker HTTP " + thumbResponse.status);
         }
 
         const thumbData = await thumbResponse.json();
