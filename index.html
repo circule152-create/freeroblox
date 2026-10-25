@@ -17,9 +17,10 @@ body{
     repeating-linear-gradient(135deg, var(--navy) 0 60px, #141417 60px 64px, var(--navy) 64px 124px, #19191c 124px 128px);
   background-attachment:fixed;overflow-x:hidden;
 }
-.stripes{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.5}
-.stripes span{position:absolute;top:-10%;bottom:-10%;width:18px;background:var(--crimson);transform:rotate(18deg)}
+.stripes{position:fixed;inset:-50%;pointer-events:none;z-index:0;opacity:.45;animation:spin 6s linear infinite;transform-origin:center}
+.stripes span{position:absolute;left:-10%;right:-10%;height:22px;background:var(--crimson);transform:rotate(18deg)}
 .stripes span.g{background:var(--forest)}
+@keyframes spin{to{transform:rotate(360deg)}}
 main{position:relative;z-index:1;max-width:1040px;margin:0 auto;padding:40px 20px 70px}
 header{text-align:center;margin-bottom:10px}
 .crest{width:72px;height:72px;margin:0 auto 18px;border:3px solid var(--gold);border-radius:50%;
@@ -50,8 +51,9 @@ h1{font-family:'Playfair Display',serif;font-weight:900;text-align:center;font-s
   width:100%;font-family:'Playfair Display',serif;font-weight:900;font-size:clamp(22px,3.6vw,30px);color:#fff;cursor:pointer;
   background:var(--crimson);border:3px solid var(--gold);border-radius:3px;
   padding:20px 14px;box-shadow:0 7px 0 #5c1d85;transition:transform .08s,box-shadow .08s,background .15s}
-#go:hover{background:#a142e0}
-#go:active{transform:translateY(7px);box-shadow:0 0 0 #5c1d85}
+#go:hover{background:#a142e0;transform:translateY(-3px);box-shadow:0 10px 0 #5c1d85,0 0 24px rgba(139,47,201,.65);animation:shake .5s ease-in-out infinite}
+#go:active{transform:translateY(7px);box-shadow:0 0 0 #5c1d85;animation:none}
+@keyframes shake{0%,100%{transform:translateY(-3px) rotate(0)}25%{transform:translateY(-3px) rotate(-1deg)}75%{transform:translateY(-3px) rotate(1deg)}}
 #go:focus-visible,.thumb:focus-visible,#link:focus-visible{outline:4px solid var(--gold);outline-offset:3px}
 .msg{min-height:28px;margin-top:20px;font-size:16px;color:var(--white);font-weight:800}
 .rules{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin-top:46px}
@@ -63,12 +65,17 @@ h1{font-family:'Playfair Display',serif;font-weight:900;text-align:center;font-s
 #link::placeholder{color:#8a8a8e}
 #save{padding:12px 24px;border-radius:3px;border:2px solid var(--gold);background:var(--gold);color:#0d0d0f;font:inherit;font-weight:800;cursor:pointer}
 small{display:block;margin-top:28px;text-align:center;color:#a8a8ae;font-size:12px;font-weight:700}
+#sound{position:fixed;top:16px;right:16px;z-index:5;padding:10px 18px;border-radius:20px;
+  background:var(--cream);border:2px solid var(--gold);color:var(--gold);font:inherit;font-weight:800;font-size:13px;letter-spacing:.04em;cursor:pointer}
+#sound:focus-visible{outline:4px solid var(--gold);outline-offset:3px}
 .conf{position:fixed;top:-20px;width:10px;height:14px;z-index:50;pointer-events:none;animation:fall 1.8s ease-in forwards}
 @keyframes fall{to{transform:translateY(110vh) rotate(500deg)}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important}}
 </style>
 </head>
 <body>
+<button id="sound" type="button" aria-label="Toggle music">SOUND OFF</button>
+<audio id="bgm" src="bg-music.mp3" loop preload="auto"></audio>
 <div class="stripes" id="stripes" aria-hidden="true"></div>
 <main>
   <header>
@@ -174,10 +181,22 @@ $('save').addEventListener('click',()=>{
   for(let i=0;i<10;i++){
     const s = document.createElement('span');
     if(i%2===0) s.classList.add('g');
-    s.style.left = (i*11)+'%';
+    s.style.top = (i*11)+'%';
     box.appendChild(s);
   }
 })();
+
+const bgm = $('bgm'), soundBtn = $('sound');
+let playing = false;
+function startMusic(){
+  bgm.play().then(()=>{ playing = true; soundBtn.textContent = 'SOUND ON'; })
+            .catch(()=>{ playing = false; soundBtn.textContent = 'SOUND OFF'; });
+}
+function stopMusic(){ bgm.pause(); playing = false; soundBtn.textContent = 'SOUND OFF'; }
+soundBtn.addEventListener('click', () => { playing ? stopMusic() : startMusic(); });
+// Try to autoplay on load; most browsers block this without interaction.
+// If blocked, the button stays "SOUND OFF" and clicking it starts playback.
+startMusic();
 
 let start = STREAM_LINK;
 if(!start){ try{ start = localStorage.getItem('streamLink') || ""; }catch(e){} }
